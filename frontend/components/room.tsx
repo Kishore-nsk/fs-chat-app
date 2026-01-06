@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useEffectEvent } from "react";
+import { useEffect, useRef, useState } from "react";
 
 interface NameProps {
     name: string;
