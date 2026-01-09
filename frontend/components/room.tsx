@@ -1,70 +1,94 @@
 import { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router";
+import DisplayMessage from "./message";
+import DisplayRoomNumber from "./room_number";
 
-interface NameProps {
-    name: string;
-}
-
-interface Message {
-    name: string;
+export interface Message {
+    username: string;
     message: string;
 }
 
-const ChatRoom = ({name} : NameProps) => {
-    const connection = useRef<WebSocket>(null);
-    const [inputMessage, setInputeMessage] = useState<string>("");
-    const [messages, setMessages] = useState<Message[]>([]);
+const ChatRoom = () => {
+    const connection = useRef<WebSocket>(null); //to store the websocket
+    const name = useRef<string | null>(""); //to store the username
+    const roomNumber = useRef<string | null>(""); // to store the room number 
+    const [inputMessage, setInputeMessage] = useState<string>(""); // to store the message typed by the user 
+    const [messages, setMessages] = useState<Message[]>([]); // to display the messages received from the connection
+    const chatRef = useRef<HTMLDivElement>(null);
+    const navigate = useNavigate();
     
     useEffect(() => {
+        name.current = localStorage.getItem("username");
+        roomNumber.current = localStorage.getItem("roomNumber");
+        if (name.current === "") {
+            navigate("/");
+        }
         const ws = new WebSocket("ws://localhost:8080");
+
+        ws.onopen = () => {
+            ws.send(JSON.stringify({"username": name.current, "roomNo": roomNumber.current}))
+        }
+
         ws.onmessage = (event) => {
             setMessages((prev) => [...prev, JSON.parse(event.data)]);
         } 
 
+        ws.onclose = () => {
+            ws.send(JSON.stringify({"message": `${name.current} has left the server`}));
+        }
+
         connection.current = ws;
 
         return () => {
-            //@ts-ignore
-            connection.current.close();
+            if (connection.current) {
+                if (connection.current.readyState === WebSocket.OPEN) {
+                    connection.current.close();
+                }
+        }
         }
     }, []);
+
+    useEffect(() => {
+        if (chatRef.current) {
+            chatRef.current.scrollTop = chatRef.current.scrollHeight;
+        }
+    },[messages]);
 
     const sendMessage = () => {
         if(inputMessage && connection.current) {
             const message = inputMessage;
-            connection.current.send(JSON.stringify({name: name, message: message}));
+            connection.current.send(JSON.stringify({username: name.current, message: message}));
             setInputeMessage("");
         }
 
     }
 
     const messageItems = messages.map(message => {
-        return <DisplayMessage name={message.name} message={message.message} />
+        return <DisplayMessage key={messages.indexOf(message)} username={message.username} message={message.message} />
     })
 
     return ( 
-        <div className="h-[100vh] w-[100vw] flex justify-center items-center bg-black">
-            <div className="h-[700px] w-[700px] border-1 border-solid border-white text-white">
-                <div className="h-[630px] w-[100%]">
+        <div className="h-[100vh] w-[100vw] flex justify-center items-center gap-[50px] bg-[#e0dcdc] font-thin">
+            <div className="h-[700px] w-[700px] bg-white text-black rounded-t-[8px]">
+                <div ref={chatRef} className="h-[630px] w-[100%] pl-[5px] overflow-y-scroll">
                     {messageItems}
                 </div>
-                <div className="h-[70px] w-[100%] border-t-1 boreder-solid border-white flex justify-between items-center">
+                <div className="h-[70px] w-[100%] flex justify-between items-center">
                     <form onSubmit={(event) => {
                         event.preventDefault();
                         sendMessage();
                     }}>
-                        <input onChange={e => setInputeMessage(e.target.value)} value={inputMessage} type="text" placeholder="Type a message" className="ml-[10px] border-1 border-solid border-white rounded-[10px] h-[40px] pl-[5px] w-[300px]" />
+                        <input onChange={e => setInputeMessage(e.target.value)} value={inputMessage} type="text" placeholder="Type a message" className="ml-[10px] h-[40px] pl-[7px] w-[620px] bg-[#e0dcdc] rounded-[30px] focus:outline-none text-black" />
                     </form>
-                    <button onClick={sendMessage} className="border-1 boreder-solid border-white rounded-[20px] mr-[10px] w-[60px] h-[40px] cursor-pointer">Send</button>
+                    <button onClick={sendMessage} className="mr-[10px] w-[50px] h-[50px] rounded-[50%] bg-[#e0dcdc] cursor-pointer transition duration-200 ease-in-out hover:bg-[#0866ff] hover:text-white">Send</button>
                 </div>
             </div>
+            <DisplayRoomNumber  roomNumber={Number(roomNumber.current)} />
         </div>
     )
 }
 
-const DisplayMessage = ({name, message}: Message) => {
-    return (
-        <p>{`${name}: ${message}`}</p>
-    )
-}
 
 export default ChatRoom;
+
+
