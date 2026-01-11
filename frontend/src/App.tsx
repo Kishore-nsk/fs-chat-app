@@ -1,7 +1,6 @@
 import Welcome from "../components/welcome";
 import {Routes, Route } from "react-router"
 import ChatRoom from "../components/room";
-import { useState } from "react";
 
 function App() {
   return (
