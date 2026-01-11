@@ -1,6 +1,7 @@
 import { v4 } from "uuid";
 import { WebSocket, WebSocketServer } from "ws";
 import dotenv from "dotenv";
+import http from "http";
 
 interface WebSocketWithId extends WebSocket {
     id: string;
@@ -9,9 +10,11 @@ interface WebSocketWithId extends WebSocket {
 }
 
 dotenv.config();
-const PORT = process.env.PORT;
+const PORT = process.env.PORT || 3000;
 
-const wss = new WebSocketServer({port: 8080});
+const server = http.createServer();
+
+const wss = new WebSocketServer({ server });
 
 wss.on("connection" , (socket: WebSocketWithId) => {
     socket.id = v4();
@@ -48,9 +51,9 @@ wss.on("connection" , (socket: WebSocketWithId) => {
     })
 })
 
-wss.on("listening", () => {
-    console.log(`Server listening on port: ${PORT}`);
-}) 
+server.listen(PORT, () => {
+    console.log(`Server listening on ${PORT}`);
+})
 
 
 //Whats the next problem? You want to seperate the connections by rooms. how?
