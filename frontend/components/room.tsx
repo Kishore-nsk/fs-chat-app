@@ -23,7 +23,7 @@ const ChatRoom = () => {
         if (!name.current) {
             navigate("/");
         }
-        connection.current = new WebSocket("ws://localhost:8080");
+        connection.current = new WebSocket("wss://fs-chat-app-abbj.onrender.com");
 
         connection.current.onopen = () => {
             if (connection.current) {
