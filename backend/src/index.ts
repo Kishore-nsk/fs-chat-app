@@ -14,7 +14,6 @@ wss.on("connection" , (socket: WebSocketWithId) => {
     socket.on("message", (data) => {
         const jsonData = JSON.parse(data.toString());
         const messageType =  jsonData.type;
-        console.log(messageType);
         if (messageType === "join") {
             socket.username = jsonData.username;
             socket.roomNumber = jsonData.roomNumber;
@@ -36,7 +35,6 @@ wss.on("connection" , (socket: WebSocketWithId) => {
         } 
     })
     socket.on("close", () => {
-        console.log("code reached here");
         wss.clients.forEach(client => {
             //@ts-ignore
             if (client.roomNumber === socket.roomNumber) {
