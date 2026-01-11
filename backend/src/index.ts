@@ -1,11 +1,15 @@
 import { v4 } from "uuid";
 import { WebSocket, WebSocketServer } from "ws";
+import dotenv from "dotenv";
 
 interface WebSocketWithId extends WebSocket {
     id: string;
     username:string;
     roomNumber: number;
 }
+
+dotenv.config();
+const PORT = process.env.PORT;
 
 const wss = new WebSocketServer({port: 8080});
 
@@ -45,7 +49,7 @@ wss.on("connection" , (socket: WebSocketWithId) => {
 })
 
 wss.on("listening", () => {
-    console.log("Web Socket server listening on port 8080");
+    console.log(`Server listening on port: ${PORT}`);
 }) 
 
 
