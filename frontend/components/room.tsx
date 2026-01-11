@@ -20,31 +20,29 @@ const ChatRoom = () => {
     useEffect(() => {
         name.current = localStorage.getItem("username");
         roomNumber.current = localStorage.getItem("roomNumber");
-        if (name.current === "") {
+        if (!name.current) {
             navigate("/");
         }
-        const ws = new WebSocket("ws://localhost:8080");
+        connection.current = new WebSocket("ws://localhost:8080");
 
-        ws.onopen = () => {
-            ws.send(JSON.stringify({"username": name.current, "roomNo": roomNumber.current}))
+        connection.current.onopen = () => {
+            if (connection.current) {
+                connection.current.send(JSON.stringify({"type": "join","username": name.current, "roomNumber": roomNumber.current}))
+            }
         }
 
-        ws.onmessage = (event) => {
+        connection.current.onmessage = (event) => {
             setMessages((prev) => [...prev, JSON.parse(event.data)]);
         } 
 
-        ws.onclose = () => {
-            ws.send(JSON.stringify({"message": `${name.current} has left the server`}));
+        connection.current.onclose = () => {
+            localStorage.clear();
         }
-
-        connection.current = ws;
 
         return () => {
-            if (connection.current) {
-                if (connection.current.readyState === WebSocket.OPEN) {
-                    connection.current.close();
-                }
-        }
+            if (connection.current && connection.current.readyState === WebSocket.OPEN) {
+                connection.current.close();
+            }
         }
     }, []);
 
@@ -57,7 +55,7 @@ const ChatRoom = () => {
     const sendMessage = () => {
         if(inputMessage && connection.current) {
             const message = inputMessage;
-            connection.current.send(JSON.stringify({username: name.current, message: message}));
+            connection.current.send(JSON.stringify({type: "message", username: name.current, message: message}));
             setInputeMessage("");
         }
 
