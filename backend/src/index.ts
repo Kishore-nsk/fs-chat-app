@@ -13,26 +13,36 @@ wss.on("connection" , (socket: WebSocketWithId) => {
     socket.id = v4();
     socket.on("message", (data) => {
         const jsonData = JSON.parse(data.toString());
-        if (jsonData.username && jsonData.roomNo) {
+        const messageType =  jsonData.type;
+        console.log(messageType);
+        if (messageType === "join") {
             socket.username = jsonData.username;
-            socket.roomNumber = Number(jsonData.roomNo);
+            socket.roomNumber = jsonData.roomNumber;
             wss.clients.forEach((client) => {
                 //@ts-ignore
                 if (client.roomNumber === socket.roomNumber) {
                     //@ts-ignore
-                    socket.id === client.id ? client.send(JSON.stringify({"username": "You have joined the server"})) : client.send(JSON.stringify({"username": `${socket.username} has joined the server`}));
+                    socket.id === client.id ? client.send(JSON.stringify({"message" : `You have joined the server` })) : client.send(JSON.stringify({"message": `${socket.username} has joined the server`}));
                 }
             })
-        } else {
-            wss.clients.forEach(client => {
+        } else if (messageType === "message") {
+            wss.clients.forEach((client) => {
                 //@ts-ignore
                 if (client.roomNumber === socket.roomNumber) {
                     //@ts-ignore
-                    socket.id === client.id ? client.send(JSON.stringify({"username": "You", "message": jsonData.message})) : client.send(JSON.stringify({"username": socket.username, "message": jsonData.message}));
+                    socket.id === client.id ? client.send(JSON.stringify({"username": "You", "message": jsonData.message})) : client.send(JSON.stringify({"username": socket.username, "message": jsonData.message}))
                 }
             })
-        }
-            
+        } 
+    })
+    socket.on("close", () => {
+        console.log("code reached here");
+        wss.clients.forEach(client => {
+            //@ts-ignore
+            if (client.roomNumber === socket.roomNumber) {
+                    client.send(JSON.stringify({message: `${socket.username} has left the server.`}));
+                }
+        })
     })
 })
 

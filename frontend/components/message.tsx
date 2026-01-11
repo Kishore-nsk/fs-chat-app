@@ -1,4 +1,4 @@
-import { Message } from "./room";
+import {type Message }  from "./room";
 
 //bg-[#0866ff] 
 

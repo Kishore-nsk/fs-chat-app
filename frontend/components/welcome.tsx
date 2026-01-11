@@ -1,4 +1,4 @@
-import { ChangeEvent, useRef, useState } from "react";
+import { type ChangeEvent, useState } from "react";
 import { useNavigate } from "react-router";
 
 const Welcome = () => {
@@ -17,6 +17,8 @@ const Welcome = () => {
         setIsChecked(event.target.checked);
     }
 
+    const buttonText = isChecked ? "Join Chat" : "Start Chat";
+
     return ( 
         <div className="h-[325px] w-[325px] bg-white text-[#1d2129;] rounded-t-[8px] flex flex-col justify-center items-center gap-[20px]">
             <input placeholder="Enter your name:" type="text" value={name} onChange={(event) => setName(event.target.value)} className="pl-[8px] bg-white border-1 border-solid border-[#e0dcdc] rounded-[5px] ml-[10px] h-[40px] w-[250px]" />
@@ -27,7 +29,7 @@ const Welcome = () => {
             {isChecked ? (
                 <input type="text" value={roomNumber} onChange={(event) => setRoomNumber(event.target.value)} placeholder="Enter room number:" className="pl-[8px] bg-white border-1 border-solid border-[#e0dcdc] rounded-[5px] ml-[10px] h-[40px] w-[250px]" />
             ) : null}
-            <button disabled={name.length === 0 || (isChecked && roomNumber.length === 0)} className="w-[250px] h-[40px] cursor-pointer rounded-[5px] bg-[#0866ff] text-white transition duration-200 hover:bg-[#7aa9f5] border-0 disabled:bg-[#7aa9f5]" onClick={joinRoom}>Join</button>
+            <button disabled={name.length === 0 || (isChecked && roomNumber.length === 0)} className="w-[250px] h-[40px] cursor-pointer rounded-[5px] bg-[#0866ff] text-white transition duration-200 hover:bg-[#7aa9f5] border-0 disabled:bg-[#7aa9f5]" onClick={joinRoom}>{buttonText}</button>
         </div>
     )
 }
