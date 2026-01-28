@@ -1,3 +1,6 @@
-Full stack Notes Web Application with Express, Postgres & Node.js for the backend and React, Tailwind for the Front end.
+Group Chat Web Application using WebSockets (ws library) and Node.js for the backend. React and tailwind for the frontend & React Router for routing.
 
-Password storage performed with bcrypt and JWT based authentication implemented.
+Demo:
+
+https://github.com/user-attachments/assets/d422c9dc-997e-41d9-aca6-00ba57be32a7
+
